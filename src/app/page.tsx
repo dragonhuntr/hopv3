@@ -1,5 +1,5 @@
-import { SuggestionCard } from "@/components/SuggestionCard";
-import { ChatContainer } from "@/components/ChatContainer";
+import { SuggestionCard } from "@/components/chat/SuggestionCard";
+import { ChatContainer } from "@/components/chat/ChatContainer";
 
 export default function HomePage() {
   return (

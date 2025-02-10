@@ -2,8 +2,8 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useRouter } from 'next/navigation';
-import { ChatMessage } from '@/components/ChatMessage';
-import { MultimodalInput } from '@/components/MultimodalInput';
+import { ChatMessage } from '@/components/chat/ChatMessage';
+import { MultimodalInput } from '@/components/chat/MultimodalInput';
 import { generateUUID } from '@/lib/utils';
 import { useState, useRef } from 'react';
 

@@ -1,4 +1,4 @@
-import { ChatContainer } from "@/components/ChatContainer";
+import { ChatContainer } from "@/components/chat/ChatContainer";
 
   
   export default async function ChatPage(props: { params: Promise<{ chatId: string }> }) {
