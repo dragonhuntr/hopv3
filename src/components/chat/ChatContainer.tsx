@@ -6,6 +6,7 @@ import { ChatMessage } from '@/components/chat/ChatMessage';
 import { MultimodalInput } from '@/components/chat/MultimodalInput';
 import { generateUUID } from '@/lib/utils';
 import { useState, useRef } from 'react';
+import { DEFAULT_MODEL_ID } from '@/lib/ai/models';
 
 interface ChatContainerProps {
   chatId?: string;
@@ -17,12 +18,16 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
   // we use a client-side generated chatId if it is a new chat
   const [clientChatId] = useState(() => generateUUID());
   const hasRedirected = useRef(false);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL_ID);
 
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
     id: chatId ?? clientChatId,
     sendExtraMessageFields: true,
     // use uuid for ids
-    generateId: generateUUID
+    generateId: generateUUID,
+    body: {
+      model: selectedModel
+    }
   });
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,6 +55,8 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
           disabled={isLoading}
           value={input}
           onChange={handleInputChange}
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
         />
       </div>
     </div>

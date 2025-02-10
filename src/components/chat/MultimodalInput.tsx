@@ -1,12 +1,16 @@
 "use client";
 
 import { Search, Settings, SendHorizontal } from "lucide-react";
+import { useState } from "react";
+import { ModelSelector } from "@/components/chat/ModelSelector";
 
 interface MultimodalInputProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   value?: string;
+  selectedModel: string;
+  onModelChange: (model: string) => void;
 }
 
 export function MultimodalInput({
@@ -14,19 +18,32 @@ export function MultimodalInput({
   onChange,
   disabled,
   value,
+  selectedModel,
+  onModelChange,
 }: MultimodalInputProps) {
+  const [isModelSelectorOpen, setIsModelSelectorOpen] = useState(false);
+
   return (
     <div className="mx-auto w-full max-w-4xl p-4">
       <div className="flex w-full items-center gap-2 rounded-xl bg-gray-900/50 px-4 py-3">
-        <div className="flex gap-2">
+        <div className="relative flex gap-2">
           <button
             className="rounded-lg p-1 transition-colors hover:bg-gray-800"
-            aria-label="Settings"
+            aria-label="Model settings"
+            onClick={() => setIsModelSelectorOpen(!isModelSelectorOpen)}
+            disabled={disabled}
           >
             <Settings size={20} className="text-gray-400" />
           </button>
+          
+          {isModelSelectorOpen && (
+            <ModelSelector
+              selectedModel={selectedModel}
+              onModelChange={onModelChange}
+              onClose={() => setIsModelSelectorOpen(false)}
+            />
+          )}
 
-          <Search size={20} className="mt-1 text-gray-400" />
         </div>
         <form
           onSubmit={onSubmit}
