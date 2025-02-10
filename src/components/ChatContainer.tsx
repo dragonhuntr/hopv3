@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ChatMessage } from '@/components/ChatMessage';
 import { MultimodalInput } from '@/components/MultimodalInput';
 import { generateUUID } from '@/lib/utils';
+import { useState, useRef } from 'react';
 
 interface ChatContainerProps {
   chatId?: string;
@@ -12,20 +13,27 @@ interface ChatContainerProps {
 
 export function ChatContainer({ chatId }: ChatContainerProps) {
   const router = useRouter();
-  
+
+  // we use a client-side generated chatId if it is a new chat
+  const [clientChatId] = useState(() => generateUUID());
+  const hasRedirected = useRef(false);
+
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
-    id: chatId,
+    id: chatId ?? clientChatId,
     sendExtraMessageFields: true,
-    async onResponse(response) {
-      if (!chatId && response.ok) {
-        const { chatId: newChatId } = await response.json();
-        router.replace(`/chat/${newChatId}`);
-      }
-    }
+    // use uuid for ids
+    generateId: generateUUID
   });
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // only redirect on new chats
+    if (!chatId && !hasRedirected.current) {
+      hasRedirected.current = true;
+      router.replace(`/chat/${clientChatId}`);
+    }
+    
     handleSubmit(e);
   };
 
@@ -36,12 +44,14 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
           <ChatMessage key={message.id} message={message} />
         ))}
       </div>
-      <MultimodalInput 
-        onSubmit={handleFormSubmit}
-        disabled={isLoading}
-        value={input}
-        onChange={handleInputChange}
-      />
+      <div className="w-full px-4 pb-4 min-w-0">
+        <MultimodalInput 
+          onSubmit={handleFormSubmit}
+          disabled={isLoading}
+          value={input}
+          onChange={handleInputChange}
+        />
+      </div>
     </div>
   );
 } 
