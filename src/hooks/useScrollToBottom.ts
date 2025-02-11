@@ -26,10 +26,26 @@ export function useScrollToBottom<T extends HTMLElement>(): [
     const end = endRef.current;
     if (!container || !end) return;
 
+    // Use mutation observer to detect content changes
+    const observer = new MutationObserver(() => {
+      if (isScrolledToBottom.current) {
+        end.scrollIntoView({ behavior: 'auto' });
+      }
+    });
+
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    // Initial check
     if (isScrolledToBottom.current) {
-      end.scrollIntoView({ behavior: 'smooth' });
+      end.scrollIntoView({ behavior: 'auto' });
     }
-  });
+
+    return () => observer.disconnect();
+  }, []);
 
   return [containerRef, endRef];
 }

@@ -8,10 +8,7 @@ export async function POST(req: Request) {
   const result = streamText({
     model: litellm(model),
     messages,
-    experimental_transform: smoothStream({
-      delayInMs: null,
-      chunking: 'line',
-    }),
+    experimental_transform: smoothStream(),
     async onFinish({ response }) {
       await saveChat({
         id,
@@ -23,6 +20,9 @@ export async function POST(req: Request) {
       });
     },
   });
+
+  // allow the stream to finish even if the client disconnects
+  result.consumeStream();
 
   return result.toDataStreamResponse();
 }
