@@ -1,5 +1,6 @@
 import { models } from '@/lib/ai/models';
 import { Zap, Image } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 interface ModelSelectorProps {
   selectedModel: string;
@@ -12,10 +13,28 @@ export function ModelSelector({
   onModelChange,
   onClose,
 }: ModelSelectorProps) {
+  const modelSelectorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modelSelectorRef.current &&
+        !modelSelectorRef.current.contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [onClose]);
+
   return (
     <div
+      ref={modelSelectorRef}
       className="absolute left-0 bottom-10 z-10 min-w-[200px] rounded-lg bg-gray-900 p-2 shadow-xl"
-      onBlur={onClose}
       role="menu"
     >
       {models.map((model) => (
