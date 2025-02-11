@@ -2,12 +2,12 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 import { ChatMessage } from '@/components/chat/ChatMessage';
 import { MultimodalInput } from '@/components/chat/MultimodalInput';
 import { generateUUID } from '@/lib/utils';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { DEFAULT_MODEL_ID } from '@/lib/ai/models';
+import { useScrollToBottom } from '@/hooks/useScrollToBottom';
 
 interface ChatContainerProps {
   chatId?: string;
@@ -29,6 +29,9 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
     }
   });
 
+  // Add scroll hooks
+  const [containerRef, endRef] = useScrollToBottom<HTMLDivElement>();
+
   // Memoized chat history loader
   const loadChatHistory = useCallback(async () => {
     if (!chatId) return;
@@ -44,7 +47,6 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
       }
     } catch (error) {
       console.error('Failed to load chat history:', error);
-      toast.error('Failed to load chat history');
     } finally {
       setIsLoadingHistory(false);
     }
@@ -69,7 +71,7 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={containerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {isLoadingHistory ? (
           // Loading skeleton
           <div className="space-y-4">
@@ -89,6 +91,8 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
             Start a new conversation
           </div>
         )}
+        
+        <div ref={endRef} />
       </div>
       <div className="w-full px-4 pb-4 min-w-0">
         <MultimodalInput 
