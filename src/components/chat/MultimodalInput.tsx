@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Settings, SendHorizontal } from "lucide-react";
+import { Settings, SendHorizontal } from "lucide-react";
 import { useState } from "react";
 import { ModelSelector } from "@/components/chat/ModelSelector";
 

@@ -3,6 +3,7 @@ import "@/styles/globals.css";
 import { GeistMono } from "geist/font/mono";
 import { type Metadata } from "next";
 import { Sidebar } from "@/components/Sidebar";
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: "HopV3",
@@ -22,6 +23,7 @@ export default function RootLayout({
           <Sidebar />
           <main className="flex-1">{children}</main>
         </div>
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );
