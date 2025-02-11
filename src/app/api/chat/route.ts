@@ -9,12 +9,13 @@ export async function POST(req: Request) {
     model: litellm(model),
     messages,
     experimental_transform: smoothStream({
-      delayInMs: 20, // optional: defaults to 10ms
-      chunking: 'line', // optional: defaults to 'word'
+      delayInMs: null,
+      chunking: 'line',
     }),
     async onFinish({ response }) {
       await saveChat({
         id,
+        model,
         messages: appendResponseMessages({
           messages,
           responseMessages: response.messages,

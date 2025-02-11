@@ -25,7 +25,7 @@ export function ModelSelector({
             onModelChange(model.id);
             onClose();
           }}
-          className={`w-full rounded px-3 py-2 text-left text-sm flex items-center gap-2 ${
+          className={`w-full rounded mb-2 px-3 py-2 text-left text-sm flex items-center gap-2 ${
             model.id === selectedModel
               ? 'bg-gray-700 text-white'
               : 'text-gray-300 hover:bg-gray-700'

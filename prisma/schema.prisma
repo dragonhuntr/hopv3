@@ -15,6 +15,7 @@ model Chat {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   messages  Message[]
+  model     String    @default("gemini-flash")
 }
 
 model Message {

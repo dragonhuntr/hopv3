@@ -1,11 +1,11 @@
 import { db } from "@/server/db";
 import type { Message as AIMessage } from "ai";
 
-export async function saveChat({ id, messages }: { id: string; messages: AIMessage[] }) {
+export async function saveChat({ id, messages, model }: { id: string; messages: AIMessage[], model: string }) {
   // Upsert the chat
   await db.chat.upsert({
     where: { id },
-    create: { id },
+    create: { id, model },
     update: { updatedAt: new Date() },
   });
 
@@ -42,9 +42,9 @@ export async function getChat(id: string) {
 
   return {
     ...chat,
-    messages: chat.messages.map((msg) => ({
+    messages: chat.messages.map((msg: AIMessage) => ({
       id: msg.id,
-      role: msg.role as AIMessage["role"],
+      role: msg.role,
       content: msg.content,
     })),
   };
