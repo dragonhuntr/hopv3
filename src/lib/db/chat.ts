@@ -9,23 +9,22 @@ export async function saveChat({ id, messages, model }: { id: string; messages: 
     update: { updatedAt: new Date() },
   });
 
-  // Save all messages using upsert instead of create
-  await Promise.all(
-    messages.map((message) =>
-      db.message.upsert({
-        where: { id: message.id },
-        create: {
-          id: message.id,
-          chatId: id,
-          role: message.role,
-          content: message.content,
-        },
-        update: {
-          content: message.content, // Only update content if message exists
-        },
-      })
-    )
-  );
+  // Save messages in sequence with proper timestamps
+  for (const message of messages) {
+    await db.message.upsert({
+      where: { id: message.id },
+      create: {
+        id: message.id,
+        chatId: id,
+        role: message.role,
+        content: message.content,
+        createdAt: message.createdAt || new Date(), // Use message timestamp if available
+      },
+      update: {
+        content: message.content,
+      },
+    });
+  }
 }
 
 export async function getChat(id: string) {
