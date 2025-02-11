@@ -53,7 +53,7 @@ export function MultimodalInput({
           <input
             type="text"
             name="message"
-            placeholder="What will you find out today?"
+            placeholder="type your message.."
             disabled={disabled}
             value={value}
             onChange={onChange}

@@ -41,7 +41,6 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
       const chat = await response.json();
       if (chat?.messages) {
         setMessages(chat.messages);
-        toast.success('Chat history loaded');
       }
     } catch (error) {
       console.error('Failed to load chat history:', error);

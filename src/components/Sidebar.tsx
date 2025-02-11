@@ -90,8 +90,8 @@ export function Sidebar() {
         </div>
         
         <nav className="mt-4 space-y-2 text-sm">
-          <NavItem icon={<Plus size={14}/>} label="New thread" href="/" isCollapsed={isCollapsed} />
-          <NavItem icon={<Archive size={14}/>} label="Folders" href="/folders" isCollapsed={isCollapsed} />
+          <NavItem icon={<Plus size={14}/>} label="new chat" href="/" isCollapsed={isCollapsed} />
+          <NavItem icon={<Archive size={14}/>} label="folders" href="/folders" isCollapsed={isCollapsed} />
         </nav>
 
         {!isCollapsed && (
