@@ -39,7 +39,7 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
     setIsLoadingHistory(true);
     try {
       const response = await fetch(`/api/chat/${chatId}`);
-      if (!response.ok) throw new Error('Failed to load chat');
+      //if (!response.ok) throw new Error('Failed to load chat');
       
       const chat = await response.json();
       if (chat?.messages) {

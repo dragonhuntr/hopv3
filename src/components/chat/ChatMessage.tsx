@@ -30,14 +30,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
           rehypePlugins={[rehypeMath, rehypeKatex, rehypeHighlight]}
           components={{
             code({ node, className, children, ...props }) {
-              if (!className?.includes('math')) {
                 return (
                   <code className={clsx(className, "bg-gray-900 px-1 py-0.5 rounded max-w-full break-words")} {...props}>
                     {children}
                   </code>
                 )
-              }
-              return <code {...props}>{children}</code>
             },
             pre({ node, className, children, ...props }) {
               return (
