@@ -48,3 +48,25 @@ export async function getChat(id: string) {
     })),
   };
 } 
+
+export async function getChatList() {
+  const chats = await db.chat.findMany({
+    orderBy: { updatedAt: 'desc' },
+    select: {
+      id: true,
+      updatedAt: true,
+      model: true,
+      messages: {
+        orderBy: { createdAt: 'asc' },
+        take: 1
+      }
+    }
+  });
+
+  return chats.map(chat => ({
+    id: chat.id,
+    title: chat.messages[0]?.content.substring(0, 50) || 'New Chat',
+    updatedAt: chat.updatedAt,
+    model: chat.model
+  }));
+}
