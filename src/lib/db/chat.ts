@@ -41,7 +41,7 @@ export async function getChat(id: string) {
 
   return {
     ...chat,
-    messages: chat.messages.map((msg: AIMessage) => ({
+    messages: chat.messages.map((msg) => ({
       id: msg.id,
       role: msg.role,
       content: msg.content,

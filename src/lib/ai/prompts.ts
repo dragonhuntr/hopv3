@@ -31,10 +31,11 @@ This is a guide for using blocks tools: \`createDocument\` and \`updateDocument\
 Do not update document right after creating it. Wait for user feedback or request to update it.
 `;
 
-export const regularPrompt =
-  'You are a friendly assistant! Keep your responses concise and helpful.';
+export const systemPrompt = `
+You are a friendly assistant! Keep your responses concise and helpful.
 
-export const systemPrompt = `${regularPrompt}`;
+If a response with math equation is required, stricly use LaTeX format. For example, to render the equation x^2, use the following format: $x^2$.
+`;
 
 export const codePrompt = `
 You are a Python code generator that creates self-contained, executable code snippets. When writing code:
