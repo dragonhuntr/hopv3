@@ -2,9 +2,19 @@ import type { Message } from 'ai';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import clsx from 'clsx';
+import rehypeKatex from 'rehype-katex';
+// @ts-expect-error
+import rehypeMath from 'rehype-math';
 
 interface ChatMessageProps {
   message: Message;
+}
+
+// Update existing type declaration
+type MathComponentProps = React.ComponentProps<'code'> & {
+  node?: unknown
+  className?: string
+  children?: React.ReactNode
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
@@ -17,13 +27,17 @@ export function ChatMessage({ message }: ChatMessageProps) {
       }`}>
         <ReactMarkdown
           className="text-sm overflow-x-auto break-words leading-[1.5rem]"
+          rehypePlugins={[rehypeMath, rehypeKatex, rehypeHighlight]}
           components={{
             code({ node, className, children, ...props }) {
-              return (
-                <code className={clsx(className, "bg-gray-900 px-1 py-0.5 rounded max-w-full break-words")} {...props}>
-                  {children}
-                </code>
-              )
+              if (!className?.includes('math')) {
+                return (
+                  <code className={clsx(className, "bg-gray-900 px-1 py-0.5 rounded max-w-full break-words")} {...props}>
+                    {children}
+                  </code>
+                )
+              }
+              return <code {...props}>{children}</code>
             },
             pre({ node, className, children, ...props }) {
               return (
@@ -45,7 +59,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
               <li className="my-1" {...props} />
             )
           }}
-          rehypePlugins={[rehypeHighlight]}
         >
           {message.content}
         </ReactMarkdown>

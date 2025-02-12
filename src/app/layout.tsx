@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import 'katex/dist/katex.min.css';
 
 import { GeistMono } from "geist/font/mono";
 import { type Metadata } from "next";
@@ -18,6 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={GeistMono.variable}>
+      <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css" />
+      </head>
       <body className="bg-[#1C1C1C] text-white">
         <div className="flex h-screen">
           <Sidebar />
