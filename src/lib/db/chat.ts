@@ -41,7 +41,7 @@ export async function getChat(id: string) {
 
   return {
     ...chat,
-    messages: chat.messages.map((msg) => ({
+    messages: chat.messages.map((msg: AIMessage) => ({
       id: msg.id,
       role: msg.role,
       content: msg.content,
@@ -63,7 +63,7 @@ export async function getChatList() {
     }
   });
 
-  return chats.map(chat => ({
+  return chats.map((chat: any) => ({
     id: chat.id,
     title: chat.messages[0]?.content.substring(0, 50) || 'New Chat',
     updatedAt: chat.updatedAt,

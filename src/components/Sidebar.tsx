@@ -66,7 +66,18 @@ export function Sidebar() {
         console.error('Failed to load chat history:', error);
       }
     };
+    
     fetchHistory();
+    
+    // Add event listener for chat updates
+    const handleHistoryUpdate = () =>  {
+      fetchHistory();
+    };
+    window.addEventListener('update-chat-history', handleHistoryUpdate);
+    
+    return () => {
+      window.removeEventListener('update-chat-history', handleHistoryUpdate);
+    };
   }, []);
 
   return (

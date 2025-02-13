@@ -18,7 +18,7 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
   const [clientChatId] = useState(() => generateUUID());
   const hasRedirected = useRef(false);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL_ID);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
 
   const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat({
     id: chatId ?? clientChatId,
@@ -32,30 +32,26 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
   // Add scroll hooks
   const [containerRef, endRef] = useScrollToBottom<HTMLDivElement>();
 
-  // Memoized chat history loader
-  const loadChatHistory = useCallback(async () => {
-    if (!chatId) return;
-    
-    setIsLoadingHistory(true);
-    try {
-      const response = await fetch(`/api/chat/${chatId}`);
-      //if (!response.ok) throw new Error('Failed to load chat');
-      
-      const chat = await response.json();
-      if (chat?.messages) {
-        setMessages(chat.messages);
-      }
-    } catch (error) {
-      console.error('Failed to load chat history:', error);
-    } finally {
-      setIsLoadingHistory(false);
-    }
-  }, [chatId, setMessages]);
-
   // Load existing chat history
   useEffect(() => {
-    loadChatHistory();
-  }, [loadChatHistory]);
+    if (chatId) {
+      const load = async () => {
+        setIsLoadingChat(true);
+        try {
+          const response = await fetch(`/api/chat/${chatId}`);
+          const chat = await response.json();
+          if (chat?.messages) {
+            setMessages(chat.messages);
+          }
+        } catch (error) {
+          console.error('Failed to load chat history:', error);
+        } finally {
+          setIsLoadingChat(false);
+        }
+      };
+      load();
+    }
+  }, [chatId, setMessages]);
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -64,6 +60,8 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
     if (!chatId && !hasRedirected.current) {
       hasRedirected.current = true;
       router.replace(`/chat/${clientChatId}`);
+      // Dispatch update event immediately after navigation
+      window.dispatchEvent(new Event('update-chat-history'));
     }
     
     handleSubmit(e);
@@ -72,7 +70,7 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
   return (
     <div className="flex flex-col h-full">
       <div ref={containerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-        {isLoadingHistory ? (
+        {isLoadingChat ? (
           // Loading skeleton
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
@@ -97,7 +95,7 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
       <div className="w-full px-4 pb-4 min-w-0">
         <MultimodalInput 
           onSubmit={handleFormSubmit}
-          disabled={isLoading || isLoadingHistory}
+          disabled={isLoading || isLoadingChat}
           value={input}
           onChange={handleInputChange}
           selectedModel={selectedModel}

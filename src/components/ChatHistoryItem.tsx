@@ -1,4 +1,3 @@
-import { formatDistanceToNow } from "date-fns";
 import { NavItem } from "@/components/Sidebar";
 
 interface ChatHistoryItemProps {
@@ -8,7 +7,7 @@ interface ChatHistoryItemProps {
   isCollapsed: boolean;
 }
 
-export function ChatHistoryItem({ id, title, updatedAt, isCollapsed }: ChatHistoryItemProps) {
+export function ChatHistoryItem({ id, title, isCollapsed }: ChatHistoryItemProps) {
   return (
     <NavItem
       icon={<span className="text-sm">💬</span>}

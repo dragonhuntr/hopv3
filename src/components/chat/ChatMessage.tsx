@@ -10,13 +10,6 @@ interface ChatMessageProps {
   message: Message;
 }
 
-// Update existing type declaration
-type MathComponentProps = React.ComponentProps<'code'> & {
-  node?: unknown
-  className?: string
-  children?: React.ReactNode
-}
-
 export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === 'user';
   
@@ -31,14 +24,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
           components={{
             code({ node, className, children, ...props }) {
                 return (
-                  <code className={clsx(className, "bg-gray-900 px-1 py-0.5 rounded max-w-full break-words")} {...props}>
+                  <code className={clsx(className, "bg-gray-900 px-1 py-0.5 rounded max-w-full break-all")} {...props}>
                     {children}
                   </code>
                 )
             },
             pre({ node, className, children, ...props }) {
               return (
-                <pre className="bg-gray-900 p-4 rounded-lg overflow-x-auto my-1">
+                <pre className="bg-gray-900 p-4 rounded-lg overflow-x-auto my-1 max-w-[65vw] whitespace-pre">
                   <code className="block bg-inherit p-0 text-sm">
                     {children}
                   </code>
