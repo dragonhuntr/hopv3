@@ -53,34 +53,28 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
     }
   }, [chatId, setMessages]);
 
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     // only redirect on new chats
     if (!chatId && !hasRedirected.current) {
       hasRedirected.current = true;
       router.replace(`/chat/${clientChatId}`);
-      // Dispatch update event immediately after navigation
-      window.dispatchEvent(new Event('update-chat-history'));
     }
     
-    handleSubmit(e);
+    // Wait for the message submission to complete
+    await handleSubmit(e);
+
+    // Dispatch after message is processed
+    if (!chatId) {
+      window.dispatchEvent(new Event('update-chat-history'));
+    }
   };
 
   return (
     <div className="flex flex-col h-full">
       <div ref={containerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-        {isLoadingChat ? (
-          // Loading skeleton
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div 
-                key={i} 
-                className="animate-pulse bg-gray-800 rounded-lg h-16 w-4/5"
-              />
-            ))}
-          </div>
-        ) : messages.length > 0 ? (
+        {messages.length > 0 ? (
           messages.map(message => (
             <ChatMessage key={message.id} message={message} />
           ))

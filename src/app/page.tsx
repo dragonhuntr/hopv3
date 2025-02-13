@@ -27,9 +27,9 @@ export default function HomePage() {
             text="Explain ML transformers"
           />
         </div>
-
-
-
+      </div>
+      
+      <div className="max-w-2xl w-full">
         <ChatContainer />
       </div>
     </div>

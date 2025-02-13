@@ -119,7 +119,7 @@ export function Sidebar() {
           </button>
         </div>
 
-        <nav className="mt-4 flex-1 space-y-2 overflow-y-auto text-sm">
+        <nav className="mt-4 flex-1 space-y-2 overflow-y-auto text-sm sidebar-nav">
           <NavItem
             icon={<Plus size={14} />}
             label="new chat"
