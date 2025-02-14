@@ -119,7 +119,8 @@ export function Sidebar() {
           </button>
         </div>
 
-        <nav className="mt-4 flex-1 space-y-2 overflow-y-auto text-sm sidebar-nav">
+        {/* New Chat button outside scroll area */}
+        <div className="mt-4 space-y-2">
           <NavItem
             icon={<Plus size={14} />}
             label="new chat"
@@ -127,6 +128,13 @@ export function Sidebar() {
             isCollapsed={isCollapsed}
           />
           <div className="my-2 border-t border-gray-800" />
+        </div>
+
+        <nav className="flex-1 space-y-2 overflow-y-auto text-sm sidebar-nav 
+          [&::-webkit-scrollbar]:w-2
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:bg-gray-600
+          [&::-webkit-scrollbar-track]:bg-gray-800">
           {chatHistory.map((chat) => (
             <ChatHistoryItem
               key={chat.id}

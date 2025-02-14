@@ -26,13 +26,13 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
 }
 
-.sidebar-nav::-webkit-scrollbar {
-  display: none;
-}
-
 .sidebar-nav:hover {
   scrollbar-width: thin; /* Firefox */
-  -ms-overflow-style: auto; /* IE and Edge */
+  scrollbar-color: #4B5563 #1F2937; /* thumb and track color */
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebar-nav:hover::-webkit-scrollbar {
