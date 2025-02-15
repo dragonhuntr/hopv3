@@ -74,8 +74,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
       <div className={`max-w-[80%] rounded-lg px-4 py-4 ${
         isUser ? 'bg-purple-600' : 'bg-gray-800/50'
       }`}>
-        {parseThinkBlocks(message.content).map((part) => {
-          if (part.type === 'think') {
+        {(isUser ? [{type: 'text', content: message.content, index: 0}] : parseThinkBlocks(message.content)).map((part) => {
+          if (!isUser && part.type === 'think') {
             return (
               <details
                 key={part.index}
@@ -119,7 +119,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
               </details>
             );
           }
-          return (
+          return isUser ? (
+            <div 
+              key={part.index}
+              className="text-sm whitespace-pre-wrap break-words leading-[1.5rem]"
+            >
+              {part.content}
+            </div>
+          ) : (
             <ReactMarkdown
               key={part.index}
               className="text-sm overflow-x-auto break-words leading-[1.5rem]"
