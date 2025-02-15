@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ChatMessage } from '@/components/chat/ChatMessage';
 import { MultimodalInput } from '@/components/chat/MultimodalInput';
 import { generateUUID } from '@/lib/utils';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { DEFAULT_MODEL_ID } from '@/lib/ai/models';
 import { useScrollToBottom } from '@/hooks/useScrollToBottom';
 
@@ -40,6 +40,10 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
         try {
           const response = await fetch(`/api/chat/${chatId}`);
           const chat = await response.json();
+          if (chat?.error === 'Chat not found') {
+            router.push('/');
+            return;
+          }
           if (chat?.messages) {
             setMessages(chat.messages);
           }
@@ -51,7 +55,7 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
       };
       load();
     }
-  }, [chatId, setMessages]);
+  }, [chatId, setMessages, router]);
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

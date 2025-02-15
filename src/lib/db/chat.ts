@@ -4,17 +4,20 @@ import type { Message as AIMessage } from "ai";
 export async function saveChat({ 
   id, 
   messages, 
-  model
+  model,
+  userId
 }: { 
   id: string; 
   messages: AIMessage[]; 
   model: string;
+  userId: string;
 }) {
   await db.chat.upsert({
-    where: { id },
+    where: { id, userId },
     create: { 
-      id, 
+      id,
       model,
+      userId,
       title: "New Chat",
       messages: {
         create: messages.map(message => ({
@@ -52,9 +55,9 @@ export async function updateChatTitle({ id, title }: { id: string; title: string
   });
 }
 
-export async function getChat(id: string) {
+export async function getChat(id: string, userId: string) {
   const chat = await db.chat.findUnique({
-    where: { id },
+    where: { id, userId },
     include: {
       messages: {
         orderBy: { createdAt: "asc" },
@@ -74,8 +77,9 @@ export async function getChat(id: string) {
   };
 } 
 
-export async function getChatList() {
+export async function getChatList(userId: string) {
   const chats = await db.chat.findMany({
+    where: { userId },
     orderBy: { updatedAt: 'desc' },
     select: {
       id: true,

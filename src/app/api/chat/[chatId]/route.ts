@@ -1,10 +1,17 @@
 import { getChat } from "@/lib/db/chat";
 import { NextResponse } from "next/server";
+import { auth } from "@/app/auth";
 
-export async function GET(request: Request, { params }: { params: { chatId: string } }) {
+export async function GET(req: Request, { params }: { params: { chatId: string } }) {
   try {
+    const session = await auth.api.getSession({
+      headers: req.headers
+    });
+
+    if (!session?.user) return new Response('Unauthorized', { status: 401 });
+
     const { chatId } = await params;
-    const chat = await getChat(chatId);
+    const chat = await getChat(chatId, session.user.id);
     if (!chat) {
       return NextResponse.json({ error: "Chat not found" }, { status: 404 });
     }

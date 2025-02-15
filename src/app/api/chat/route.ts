@@ -7,6 +7,8 @@ import type { Message } from 'ai';
 import { generateText } from "ai";
 import { titlePrompt } from "@/lib/ai/prompts";
 import { DEFAULT_TITLE_MODEL_ID } from "@/lib/ai/models";
+import { auth } from "@/app/auth";
+import { headers } from "next/headers";
 
 export async function generateChatTitle(content: string) {
   const response = await generateText({
@@ -18,10 +20,21 @@ export async function generateChatTitle(content: string) {
 
 export async function POST(req: Request) {
   const { id, messages, model } = await req.json();
-  const isNew = !(await getChat(id));
+  const session = await auth.api.getSession({
+    headers: req.headers
+  });
+  console.log(session);
+  if (!session?.user) return new Response('Unauthorized', { status: 401 });
 
-  // Save initial chat with temporary title
-  await saveChat({ id, model, messages });
+  const isNew = !(await getChat(id, session.user.id));
+  
+  // Add userId to saveChat
+  await saveChat({ 
+    id, 
+    model, 
+    messages,
+    userId: session.user.id
+  });
 
   // Generate and update title immediately for new chats
   if (isNew) {
@@ -45,7 +58,8 @@ export async function POST(req: Request) {
         messages: appendResponseMessages({
           messages,
           responseMessages: response.messages,
-        })
+        }),
+        userId: session.user.id
       });
     },
   });

@@ -17,6 +17,10 @@ model Chat {
   title     String    @default("")
   messages  Message[]
   model     String    @default("gemini-flash")
+  userId    String
+  user      User      @relation("UserChats", fields: [userId], references: [id]) // Add relation name
+
+  @@index([userId])
 }
 
 model Message {
@@ -40,6 +44,7 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+  chats         Chat[]    @relation("UserChats") // Add this line
 
   @@unique([email])
   @@map("user")
