@@ -71,7 +71,7 @@ Update the following contents of the document based on the given prompt.
 ${currentContent}
 `;
 
-export const titlePrompt = (message: CoreUserMessage) => `\
+export const titlePrompt = (message: string) => `
 Generate a short title based the message.
 Ensure it is not more than 80 characters long, and that it is a summary of the message. 
 Do not use quotes or colons.

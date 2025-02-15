@@ -56,19 +56,16 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // only redirect on new chats
     if (!chatId && !hasRedirected.current) {
       hasRedirected.current = true;
       router.replace(`/chat/${clientChatId}`);
     }
     
-    // Wait for the message submission to complete
     await handleSubmit(e);
-
-    // Dispatch after message is processed
-    if (!chatId) {
+    
+    setTimeout(() => {
       window.dispatchEvent(new Event('update-chat-history'));
-    }
+    }, 2000);
   };
 
   return (

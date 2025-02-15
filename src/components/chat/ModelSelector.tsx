@@ -1,5 +1,5 @@
 import { models } from '@/lib/ai/models';
-import { Zap, Image } from 'lucide-react';
+import { Image } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
 interface ModelSelectorProps {

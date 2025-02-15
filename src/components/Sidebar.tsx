@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Archive, Plus, ChevronLeft, ChevronRight, Menu } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ChatHistoryItem } from "@/components/ChatHistoryItem";
 
@@ -69,10 +69,7 @@ export function Sidebar() {
     
     fetchHistory();
     
-    // Add event listener for chat updates
-    const handleHistoryUpdate = () =>  {
-      fetchHistory();
-    };
+    const handleHistoryUpdate = () => fetchHistory();
     window.addEventListener('update-chat-history', handleHistoryUpdate);
     
     return () => {
@@ -133,8 +130,10 @@ export function Sidebar() {
         <nav className="flex-1 space-y-2 overflow-y-auto text-sm sidebar-nav 
           [&::-webkit-scrollbar]:w-2
           [&::-webkit-scrollbar-thumb]:rounded-full
-          [&::-webkit-scrollbar-thumb]:bg-gray-600
-          [&::-webkit-scrollbar-track]:bg-gray-800">
+          [&::-webkit-scrollbar-thumb]:bg-transparent
+          [&::-webkit-scrollbar-track]:bg-transparent
+          hover:[&::-webkit-scrollbar-thumb]:bg-gray-600
+          [&>*]:whitespace-nowrap [&>*]:overflow-hidden">
           {chatHistory.map((chat) => (
             <ChatHistoryItem
               key={chat.id}
