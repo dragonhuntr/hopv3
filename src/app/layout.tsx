@@ -23,10 +23,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css" />
       </head>
       <body className="bg-[#1C1C1C] text-white">
-        <div className="flex h-screen">
-          <Sidebar />
-          <main className="flex-1">{children}</main>
-        </div>
+        {children}
         <Toaster richColors position="top-center" />
       </body>
     </html>

@@ -32,6 +32,7 @@ export function Sidebar() {
     title: string;
     updatedAt: Date;
   }>>([]);
+  const [user, setUser] = useState<{ email: string } | null>(null);
 
   // Detect mobile screens
   useEffect(() => {
@@ -75,6 +76,21 @@ export function Sidebar() {
     return () => {
       window.removeEventListener('update-chat-history', handleHistoryUpdate);
     };
+  }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch('/api/auth/get-session');
+        const data = await response.json();
+        if (data.user) {
+          setUser(data.user);
+        }
+      } catch (error) {
+        console.error('Failed to load user session:', error);
+      }
+    };
+    fetchUser();
   }, []);
 
   return (
@@ -146,18 +162,21 @@ export function Sidebar() {
         {!isCollapsed && (
           <div className="mt-auto">
             <div className="px-4 py-4">
-              <h3 className="text-sm font-medium">hop accounts</h3>
-              <p className="mt-1 text-sm text-gray-400">
-                make yours now! get access to saved threads, experiments and
-                more features.
-              </p>
               <div className="mt-4 space-y-2">
-                <button className="w-full rounded-lg bg-gray-800 px-4 py-2 text-sm text-white hover:bg-gray-700">
-                  Login
-                </button>
-                <button className="w-full rounded-lg bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-500">
-                  Sign up
-                </button>
+                {user ? (
+                  <div className="px-4 py-2 text-sm text-gray-300">
+                    {user.email}
+                  </div>
+                ) : (
+                  <>
+                    <Link href="/auth/login" className="w-full rounded-lg bg-gray-800 px-4 py-2 text-sm text-white hover:bg-gray-700">
+                      Login
+                    </Link>
+                    <Link href="/auth/register" className="w-full rounded-lg bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-500">
+                      Sign up
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
