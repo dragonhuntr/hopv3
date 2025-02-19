@@ -41,7 +41,6 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
           const response = await fetch(`/api/chat/${chatId}`);
           const chat = await response.json();
           if (chat?.error === 'Chat not found') {
-            router.push('/');
             return;
           }
           if (chat?.messages) {
@@ -87,16 +86,19 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
         
         <div ref={endRef} />
       </div>
-      <div className="w-full px-4 pb-4 min-w-0">
-        <MultimodalInput 
-          onSubmit={handleFormSubmit}
-          disabled={isLoading || isLoadingChat}
-          value={input}
-          onChange={handleInputChange}
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
-        />
-      </div>
+      
+      {(!chatId || messages.length > 0) && (
+        <div className="w-full px-4 pb-4 min-w-0">
+          <MultimodalInput 
+            onSubmit={handleFormSubmit}
+            disabled={isLoading || isLoadingChat}
+            value={input}
+            onChange={handleInputChange}
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
+          />
+        </div>
+      )}
     </div>
   );
 } 

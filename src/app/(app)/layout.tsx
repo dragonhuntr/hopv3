@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/Sidebar";
+import { Sidebar } from "@/components/sidebar/Sidebar";
 import { AuthGuard } from "@/components/AuthGuard";
 
 export default function AppLayout({
