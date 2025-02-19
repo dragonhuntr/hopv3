@@ -10,7 +10,7 @@ interface ChatHistoryItemProps {
 export function ChatHistoryItem({ id, title, isCollapsed }: ChatHistoryItemProps) {
   return (
     <NavItem
-      //icon={<span className="text-sm">💬</span>}
+      icon={<span className="text-sm">💬</span>}
       label={title}
       href={`/chat/${id}`}
       isCollapsed={isCollapsed}

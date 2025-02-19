@@ -179,7 +179,7 @@ export function Sidebar() {
           [&::-webkit-scrollbar-track]:bg-transparent
           hover:[&::-webkit-scrollbar-thumb]:bg-gray-600
           [&>*]:whitespace-nowrap [&>*]:overflow-hidden">
-          {chatHistory.map((chat) => (
+          {!isCollapsed && chatHistory.map((chat) => (
             <ChatHistoryItem
               key={chat.id}
               {...chat}
