@@ -3,7 +3,6 @@ import 'katex/dist/katex.min.css';
 
 import { GeistMono } from "geist/font/mono";
 import { type Metadata } from "next";
-import { Sidebar } from "@/components/Sidebar";
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {

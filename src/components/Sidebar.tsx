@@ -4,7 +4,9 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ChatHistoryItem } from "@/components/ChatHistoryItem";
-
+import { UserMenu } from '@/components/UserMenu';
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 interface NavItemProps {
   icon: React.ReactNode;
   label: string;
@@ -38,7 +40,9 @@ export function Sidebar() {
     updatedAt: Date;
   }>>([]);
   const [user, setUser] = useState<{ email: string } | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
+  const router = useRouter();
   // Detect mobile screens
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -85,8 +89,18 @@ export function Sidebar() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
+      try { 
         const response = await fetch('/api/auth/get-session');
+        if (!response.ok) {
+          if (response.status === 401) {
+            await authClient.signOut();
+            router.push('/login');
+            setUser(null);
+            setShowUserMenu(false);
+          }
+          return;
+        }
+        
         const data = await response.json();
         if (data.user) {
           setUser(data.user);
@@ -97,6 +111,17 @@ export function Sidebar() {
     };
     fetchUser();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await authClient.signOut();
+      router.push('/login');
+      setUser(null);
+      setShowUserMenu(false);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <>
@@ -168,8 +193,20 @@ export function Sidebar() {
             <div className="px-4 py-4">
               <div className="mt-4 space-y-2">
                 {user ? (
-                  <div className="px-4 py-2 text-sm text-gray-300">
-                    {user.email}
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="px-2 text-sm text-gray-300 hover:text-white w-full text-left"
+                    >
+                      {user.email}
+                    </button>
+                    {showUserMenu && (
+                      <UserMenu
+                        userEmail={user.email}
+                        onLogout={handleLogout}
+                        onClose={() => setShowUserMenu(false)}
+                      />
+                    )}
                   </div>
                 ) : (
                   <>
