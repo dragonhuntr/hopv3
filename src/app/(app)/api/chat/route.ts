@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   const session = await auth.api.getSession({
     headers: req.headers
   });
-  console.log(session);
+  
   if (!session?.user) return new Response('Unauthorized', { status: 401 });
 
   const isNew = !(await getChat(id, session.user.id));
