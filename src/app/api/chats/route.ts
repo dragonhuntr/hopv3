@@ -7,7 +7,13 @@ export async function GET(req: Request) {
     const session = await auth.api.getSession({
       headers: req.headers
     });
-    if (!session?.user) return new Response('Unauthorized', { status: 401 });
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
     
     const chats = await getChatList(session.user.id);
     return NextResponse.json(chats);

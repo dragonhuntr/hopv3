@@ -38,7 +38,8 @@ export function Sidebar() {
     id: string;
     title: string;
     updatedAt: Date;
-  }>>([]);
+  }> | null>(null);
+  const [chatError, setChatError] = useState<string | null>(null);
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -70,10 +71,26 @@ export function Sidebar() {
     const fetchHistory = async () => {
       try {
         const response = await fetch('/api/chats');
+        if (!response.ok) {
+          if (response.status === 401) {
+            setChatHistory([]);
+            return;
+          }
+          throw new Error('Failed to load chat history');
+        }
         const data = await response.json();
-        setChatHistory(data);
+        if (Array.isArray(data)) {
+          setChatHistory(data);
+        } else if (data.error) {
+          setChatError(data.error);
+          setChatHistory([]);
+        } else {
+          setChatHistory([]);
+        }
       } catch (error) {
         console.error('Failed to load chat history:', error);
+        setChatError(error instanceof Error ? error.message : 'Failed to load chat history');
+        setChatHistory([]);
       }
     };
 
@@ -179,13 +196,21 @@ export function Sidebar() {
           [&::-webkit-scrollbar-track]:bg-transparent
           hover:[&::-webkit-scrollbar-thumb]:bg-gray-600
           [&>*]:whitespace-nowrap [&>*]:overflow-hidden">
-          {!isCollapsed && chatHistory.map((chat) => (
-            <ChatHistoryItem
-              key={chat.id}
-              {...chat}
-              isCollapsed={isCollapsed}
-            />
-          ))}
+          {!isCollapsed && chatHistory === null ? (
+            <div className="px-4 py-2 text-gray-400">Loading...</div>
+          ) : chatError ? (
+            <div className="px-4 py-2 text-red-400">{chatError}</div>
+          ) : chatHistory && chatHistory.length > 0 ? (
+            chatHistory.map((chat) => (
+              <ChatHistoryItem
+                key={chat.id}
+                {...chat}
+                isCollapsed={isCollapsed}
+              />
+            ))
+          ) : (
+            <div className="px-4 py-2 text-gray-400">No chats yet</div>
+          )}
         </nav>
 
         {!isCollapsed && (

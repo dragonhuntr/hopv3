@@ -6,15 +6,19 @@ import { authClient } from "@/lib/auth-client";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const user = authClient.useSession();
+  const { data, isPending } = authClient.useSession();
 
   useEffect(() => {
-    if (!user) {
+    if (!isPending && !data?.user) {
       router.push("/login");
     }
-  }, [user, router]);
+  }, [data, router, isPending]);
 
-  if (!user) return null;
+  if (isPending) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  }
+
+  if (!data?.user) return null;
   
   return <>{children}</>;
 } 

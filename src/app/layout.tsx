@@ -4,6 +4,7 @@ import 'katex/dist/katex.min.css';
 import { GeistMono } from "geist/font/mono";
 import { type Metadata } from "next";
 import { Toaster } from 'sonner';
+import { authClient } from "@/lib/auth-client";
 
 export const metadata: Metadata = {
   title: "HopV3",
