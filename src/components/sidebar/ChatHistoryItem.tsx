@@ -2,16 +2,16 @@ import { NavItem } from "@/components/sidebar/Sidebar";
 
 interface ChatHistoryItemProps {
   id: string;
-  title: string;
-  updatedAt: Date;
+  name: string;
+  isPrivate: boolean;
   isCollapsed: boolean;
 }
 
-export function ChatHistoryItem({ id, title, isCollapsed }: ChatHistoryItemProps) {
+export function ChatHistoryItem({ id, name, isPrivate, isCollapsed }: ChatHistoryItemProps) {
   return (
     <NavItem
       icon={<span className="text-sm">💬</span>}
-      label={title}
+      label={name}
       href={`/chat/${id}`}
       isCollapsed={isCollapsed}
     />

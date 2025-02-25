@@ -1,13 +1,13 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { login } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,11 +18,11 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const { error } = await authClient.signIn.email({ 
-        email, 
+      await login({ 
+        username, 
         password 
-      }, {});
-      if (error) throw new Error(error.message);
+      });
+
       router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -38,14 +38,14 @@ export default function LoginPage() {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium" htmlFor="email">
-              Email
+            <label className="block text-sm font-medium" htmlFor="username">
+              Username
             </label>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="mt-1 w-full rounded-lg bg-gray-700 px-4 py-2 text-white"
               required
             />

@@ -5,8 +5,10 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ChatHistoryItem } from "@/components/sidebar/ChatHistoryItem";
 import { UserMenu } from '@/components/sidebar/UserMenu';
-import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { getUser, logout } from '@/lib/auth';
+import { Chat, getChats } from '@/lib/ai';
+
 interface NavItemProps {
   icon: React.ReactNode;
   label: string;
@@ -16,9 +18,9 @@ interface NavItemProps {
 
 export const NavItem = ({
   icon,
-  label, 
-  href, 
-  isCollapsed 
+  label,
+  href,
+  isCollapsed
 }: NavItemProps) => (
   <Link
     href={href}
@@ -34,11 +36,7 @@ export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [chatHistory, setChatHistory] = useState<Array<{
-    id: string;
-    title: string;
-    updatedAt: Date;
-  }> | null>(null);
+  const [chatHistory, setChatHistory] = useState<Chat[] | null>(null);
   const [chatError, setChatError] = useState<string | null>(null);
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -70,58 +68,31 @@ export function Sidebar() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await fetch('/api/chats');
-        if (!response.ok) {
-          if (response.status === 401) {
-            setChatHistory([]);
-            return;
-          }
-          throw new Error('Failed to load chat history');
-        }
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setChatHistory(data);
-        } else if (data.error) {
-          setChatError(data.error);
-          setChatHistory([]);
-        } else {
-          setChatHistory([]);
-        }
+        const chats = await getChats();
+        setChatHistory(chats);
       } catch (error) {
-        console.error('Failed to load chat history:', error);
-        setChatError(error instanceof Error ? error.message : 'Failed to load chat history');
         setChatHistory([]);
+        if (error instanceof Error && error.message.includes('401')) {
+          router.push('/login');
+        }
       }
     };
 
     fetchHistory();
-
-    const handleHistoryUpdate = () => fetchHistory();
-    window.addEventListener('update-chat-history', handleHistoryUpdate);
-
-    return () => {
-      window.removeEventListener('update-chat-history', handleHistoryUpdate);
-    };
   }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
-      try { 
-        const response = await fetch('/api/auth/get-session');
-        if (!response.ok) {
-          if (response.status === 401) {
-            await authClient.signOut();
-            router.push('/login');
-            setUser(null);
-            setShowUserMenu(false);
-          }
+      try {
+        const user = getUser();
+        if (!user) {
+          logout();
+          router.push('/login');
+          setUser(null);
+          setShowUserMenu(false);
           return;
         }
-        
-        const data = await response.json();
-        if (data.user) {
-          setUser(data.user);
-        }
+        setUser(user);
       } catch (error) {
         console.error('Failed to load user session:', error);
       }
@@ -131,7 +102,7 @@ export function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await authClient.signOut();
+      logout();
       router.push('/login');
       setUser(null);
       setShowUserMenu(false);

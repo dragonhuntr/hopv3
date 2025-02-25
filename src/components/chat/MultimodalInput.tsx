@@ -51,7 +51,6 @@ export function MultimodalInput({
           aria-label="Send message"
         >
           <input
-            type="text"
             name="message"
             placeholder="type your message.."
             disabled={disabled}

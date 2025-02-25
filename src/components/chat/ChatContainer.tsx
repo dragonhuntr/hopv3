@@ -1,6 +1,5 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
 import { useRouter } from 'next/navigation';
 import { ChatMessage } from '@/components/chat/ChatMessage';
 import { MultimodalInput } from '@/components/chat/MultimodalInput';
@@ -8,6 +7,7 @@ import { generateUUID } from '@/lib/utils';
 import { useState, useRef, useEffect } from 'react';
 import { DEFAULT_MODEL_ID } from '@/lib/ai/models';
 import { useScrollToBottom } from '@/hooks/useScrollToBottom';
+import { getChatMessages, sendMessage, createChat, type Message } from '@/lib/ai';
 
 interface ChatContainerProps {
   chatId?: string;
@@ -19,15 +19,9 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
   const hasRedirected = useRef(false);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL_ID);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
-
-  const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat({
-    id: chatId ?? clientChatId,
-    sendExtraMessageFields: true,
-    generateId: generateUUID,
-    body: {
-      model: selectedModel
-    }
-  });
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Add scroll hooks
   const [containerRef, endRef] = useScrollToBottom<HTMLDivElement>();
@@ -38,14 +32,8 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
       const load = async () => {
         setIsLoadingChat(true);
         try {
-          const response = await fetch(`/api/chat/${chatId}`);
-          const chat = await response.json();
-          if (chat?.error === 'Chat not found') {
-            return;
-          }
-          if (chat?.messages) {
-            setMessages(chat.messages);
-          }
+          const messagesData = await getChatMessages(chatId);
+          setMessages(messagesData);
         } catch (error) {
           console.error('Failed to load chat history:', error);
         } finally {
@@ -54,21 +42,87 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
       };
       load();
     }
-  }, [chatId, setMessages, router]);
+  }, [chatId]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
+    if (!input.trim()) return;
+
     if (!chatId && !hasRedirected.current) {
-      hasRedirected.current = true;
+      await createChat({
+        id: clientChatId,
+        name: 'New Chat',
+        isPrivate: false,
+        //modelId: selectedModel,
+      });
       router.replace(`/chat/${clientChatId}`);
+      hasRedirected.current = true;
     }
-    
-    await handleSubmit(e);
-    
-    setTimeout(() => {
+
+    const currentChatId = chatId || clientChatId;
+    const userMessage: Message = {
+      id: generateUUID(),
+      chatId: currentChatId,
+      role: 'user',
+      content: input,
+      timestamp: new Date().toISOString()
+    };
+
+    setIsLoading(true);
+    setInput('');
+    setMessages(prev => [...prev, userMessage]);
+
+    try {
+      const stream = await sendMessage(currentChatId, {
+        content: input,
+        model: selectedModel
+      });
+
+      const reader = stream.getReader();
+      const decoder = new TextDecoder();
+      let assistantMessage = '';
+
+      const tempMessage: Message = {
+        id: generateUUID(), // we dont need to match backend anyways
+        chatId: currentChatId,
+        role: 'assistant',
+        content: '',
+        timestamp: new Date().toISOString()
+      };
+
+      setMessages(prev => [...prev, tempMessage]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        assistantMessage += chunk;
+
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastMessage = newMessages[newMessages.length - 1];
+          if (!lastMessage) return newMessages;
+
+          newMessages[newMessages.length - 1] = {
+            ...lastMessage,
+            content: assistantMessage
+          };
+          return newMessages;
+        });
+      }
+
       window.dispatchEvent(new Event('update-chat-history'));
-    }, 2000);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -83,13 +137,13 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
             Start a new conversation
           </div>
         )}
-        
+
         <div ref={endRef} />
       </div>
-      
+
       {(!chatId || messages.length > 0) && (
         <div className="w-full px-4 pb-4 min-w-0">
-          <MultimodalInput 
+          <MultimodalInput
             onSubmit={handleFormSubmit}
             disabled={isLoading || isLoadingChat}
             value={input}
@@ -101,4 +155,4 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
       )}
     </div>
   );
-} 
+}

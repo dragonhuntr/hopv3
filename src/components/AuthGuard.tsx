@@ -1,24 +1,23 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { authClient } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
+import { getUser } from '@/lib/auth';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { data, isPending } = authClient.useSession();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    if (!isPending && !data?.user) {
+    const user = getUser();
+    if (!user) {
       router.push("/login");
+    } else {
+      setIsAuthenticated(true);
     }
-  }, [data, router, isPending]);
+  }, [router]);
 
-  if (isPending) {
-    return <div className="flex h-screen items-center justify-center">Loading...</div>;
-  }
-
-  if (!data?.user) return null;
+  if (!isAuthenticated) return null;
   
   return <>{children}</>;
-} 
+}
