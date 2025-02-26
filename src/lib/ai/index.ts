@@ -32,7 +32,10 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 // Chat Functions
 export async function getChats(): Promise<Chat[]> {
   const response = await fetch(`${API_BASE}/api/chats`, {
-    headers: getAuthHeaders(),
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
   });
 
   if (!response.ok) {
@@ -45,7 +48,10 @@ export async function getChats(): Promise<Chat[]> {
 export async function createChat(data: CreateChatRequest): Promise<Chat> {
   const response = await fetch(`${API_BASE}/api/chats`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(data),
   });
 
@@ -58,7 +64,10 @@ export async function createChat(data: CreateChatRequest): Promise<Chat> {
 
 export async function getChat(chatId: string): Promise<Chat> {
   const response = await fetch(`${API_BASE}/api/chats/${chatId}`, {
-    headers: getAuthHeaders(),
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
   });
 
   if (!response.ok) {
@@ -70,7 +79,10 @@ export async function getChat(chatId: string): Promise<Chat> {
 
 export async function getChatMessages(chatId: string): Promise<Message[]> {
   const response = await fetch(`${API_BASE}/api/chats/${chatId}/messages`, {
-    headers: getAuthHeaders(),
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
   });
 
   if (!response.ok) {
@@ -83,7 +95,10 @@ export async function getChatMessages(chatId: string): Promise<Message[]> {
 export async function sendMessage(chatId: string, data: SendMessageRequest): Promise<ReadableStream> {
   const response = await fetch(`${API_BASE}/api/chats/${chatId}/messages`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'text/event-stream',
+    },
     body: JSON.stringify(data),
   });
   

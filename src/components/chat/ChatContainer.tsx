@@ -49,7 +49,7 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
   const { setCurrentChat, messagesKey } = useChatContext();
 
   // State management
-  const [clientChatId] = useState<string>(generateUUID);
+  const [clientChatId, setClientChatId] = useState<string>(generateUUID);
   const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_MODEL_ID);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>('');
@@ -73,6 +73,11 @@ export function ChatContainer({ chatId }: ChatContainerProps) {
     setMessages([]);
     setError(null);
     hasRedirected.current = false;
+    
+    // Generate a new client chat ID when starting a new chat (messagesKey changes)
+    if (!chatId) {
+      setClientChatId(generateUUID());
+    }
 
     // Update the chat context with current chatId
     setCurrentChat(chatId || null);

@@ -36,6 +36,12 @@ export const models: Array<Model> = [
         description: 'For complex, multi-step tasks',
         vision: false,
     },
+    {
+        id: 'gpt-4o-mini',
+        label: 'GPT-4o Mini',
+        description: 'For complex, multi-step tasks',
+        vision: false,
+    },
 ] as const;
 
 export const DEFAULT_MODEL_ID: string = 'gemini-flash';
