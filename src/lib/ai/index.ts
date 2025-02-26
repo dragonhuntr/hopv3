@@ -36,7 +36,7 @@ export async function getChats(): Promise<Chat[]> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch chats');
+    throw new Error(response.statusText);
   }
 
   return response.json();
@@ -50,7 +50,7 @@ export async function createChat(data: CreateChatRequest): Promise<Chat> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to create chat');
+    throw new Error(response.statusText);
   }
 
   return response.json();
@@ -62,7 +62,7 @@ export async function getChat(chatId: string): Promise<Chat> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch chat');
+    throw new Error(response.statusText);
   }
 
   return response.json();
@@ -74,7 +74,7 @@ export async function getChatMessages(chatId: string): Promise<Message[]> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch messages');
+    throw new Error(response.statusText);
   }
 
   return response.json();
@@ -86,9 +86,9 @@ export async function sendMessage(chatId: string, data: SendMessageRequest): Pro
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
-
+  
   if (!response.ok) {
-    throw new Error('Failed to send message');
+    throw new Error(response.statusText);
   }
 
   return response.body!;

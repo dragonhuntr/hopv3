@@ -8,11 +8,13 @@ import { UserMenu } from '@/components/sidebar/UserMenu';
 import { useRouter } from "next/navigation";
 import { getUser, logout } from '@/lib/auth';
 import { Chat, getChats } from '@/lib/ai';
+import { useChatContext } from '@/context/ChatContext';
 
 interface NavItemProps {
   icon: React.ReactNode;
   label: string;
-  href: string;
+  href?: string;
+  onClick?: () => void;
   isCollapsed: boolean;
 }
 
@@ -20,26 +22,43 @@ export const NavItem = ({
   icon,
   label,
   href,
+  onClick,
   isCollapsed
-}: NavItemProps) => (
-  <Link
-    href={href}
-    className="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-800"
-    title={isCollapsed ? label : undefined}
-  >
-    {icon}
-    {!isCollapsed && <span>{label}</span>}
-  </Link>
-);
+}: NavItemProps) => {
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        className="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-800 w-full text-left"
+        title={isCollapsed ? label : undefined}
+      >
+        {icon}
+        {!isCollapsed && <span>{label}</span>}
+      </button>
+    );
+  }
+  
+  return (
+    <Link
+      href={href || '#'}
+      className="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-800"
+      title={isCollapsed ? label : undefined}
+    >
+      {icon}
+      {!isCollapsed && <span>{label}</span>}
+    </Link>
+  );
+};
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [chatHistory, setChatHistory] = useState<Chat[] | null>(null);
-  const [chatError, setChatError] = useState<string | null>(null);
+  const [chatError] = useState<string | null>(null);
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const { startNewChat } = useChatContext();
 
   const router = useRouter();
   // Detect mobile screens
@@ -72,16 +91,13 @@ export function Sidebar() {
         setChatHistory(chats);
       } catch (error) {
         setChatHistory([]);
-        if (error instanceof Error && error.message.includes('401')) {
+        if (error instanceof Error && error.message.includes('Unauthorized')) {
+          logout()
           router.push('/login');
         }
       }
     };
 
-    fetchHistory();
-  }, []);
-
-  useEffect(() => {
     const fetchUser = async () => {
       try {
         const user = getUser();
@@ -97,7 +113,9 @@ export function Sidebar() {
         console.error('Failed to load user session:', error);
       }
     };
+
     fetchUser();
+    fetchHistory();
   }, []);
 
   const handleLogout = async () => {
@@ -154,7 +172,7 @@ export function Sidebar() {
           <NavItem
             icon={<Plus size={14} />}
             label="new chat"
-            href="/"
+            onClick={startNewChat}
             isCollapsed={isCollapsed}
           />
           <div className="my-2 border-t border-gray-800" />

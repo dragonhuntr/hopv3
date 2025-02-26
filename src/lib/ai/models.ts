@@ -30,6 +30,12 @@ export const models: Array<Model> = [
         description: 'For complex, multi-step tasks',
         vision: true,
     },
+    {
+        id: 'claude-3.7-sonnet',
+        label: 'Claude 3.7 Sonnet',
+        description: 'For complex, multi-step tasks',
+        vision: false,
+    },
 ] as const;
 
 export const DEFAULT_MODEL_ID: string = 'gemini-flash';

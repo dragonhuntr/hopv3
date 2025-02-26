@@ -1,23 +1,43 @@
+import { type FC, useState, useMemo } from 'react';
 import type { Message } from 'ai';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
-import clsx from 'clsx';
 import rehypeKatex from 'rehype-katex';
-// @ts-expect-error
+// @ts-expect-error - Missing type definitions
 import rehypeMath from 'rehype-math';
-import { useState } from 'react';
+import clsx from 'clsx';
+
+// Define types for parsed message parts
+type MessagePart = {
+  type: 'text' | 'think';
+  content: string;
+  index: number;
+};
 
 interface ChatMessageProps {
   message: Message;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+/**
+ * ChatMessage component renders a single message in the chat interface.
+ * It handles both user messages and AI responses, including "thinking" blocks.
+ */
+export const ChatMessage: FC<ChatMessageProps> = ({ message }) => {
   const isUser = message.role === 'user';
   const [expandedThinkBlocks, setExpandedThinkBlocks] = useState<Set<number>>(new Set());
   
-  const parseThinkBlocks = (content: string) => {
-    const parts = content.split(/(<think>|<\/think>)/g);
-    const parsedParts = [];
+  /**
+   * Parses the message content to extract "think" blocks
+   * @param content - The message content to parse
+   * @returns Array of parsed message parts
+   */
+  const parseThinkBlocks = useMemo(() => {
+    if (isUser) {
+      return [{ type: 'text', content: message.content, index: 0 }] as MessagePart[];
+    }
+    
+    const parts = message.content.split(/(<think>|<\/think>)/g);
+    const parsedParts: MessagePart[] = [];
     let isInThink = false;
     let buffer = '';
     let index = 0;
@@ -42,11 +62,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           buffer += part;
         }
       } else {
-        if (isInThink) {
-          buffer += part;
-        } else {
-          buffer += part;
-        }
+        buffer += part;
       }
     }
 
@@ -59,8 +75,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
     }
 
     return parsedParts;
-  };
+  }, [message.content, isUser]);
 
+  /**
+   * Toggles the expanded state of a think block
+   * @param index - The index of the think block to toggle
+   */
   const toggleThinkBlock = (index: number) => {
     setExpandedThinkBlocks(prev => {
       const next = new Set(prev);
@@ -69,12 +89,46 @@ export function ChatMessage({ message }: ChatMessageProps) {
     });
   };
 
+  // Markdown components configuration for consistent rendering
+  const markdownComponents = {
+    code({ node, className, children, ...props }: any) {
+      return (
+        <code className={clsx(className, "bg-gray-900 px-1 py-0.5 rounded max-w-full break-all")} {...props}>
+          {children}
+        </code>
+      );
+    },
+    pre({ node, className, children, ...props }: any) {
+      return (
+        <pre className="bg-gray-900 p-4 rounded-lg overflow-x-auto my-1 max-w-[65vw] whitespace-pre">
+          <code className="block bg-inherit p-0 text-sm">{children}</code>
+        </pre>
+      );
+    },
+    p: ({ node, ...props }: any) => <p className="mb-1" {...props} />,
+    ul: ({ node, ...props }: any) => <ul className="list-disc pl-4" {...props} />,
+    ol: ({ node, ...props }: any) => <ol className="list-decimal pl-4" {...props} />,
+    li: ({ node, ...props }: any) => <li className="my-1" {...props} />
+  };
+
+  // Simpler markdown components for think blocks
+  const thinkBlockComponents = {
+    code: ({ node, className, children, ...props }: any) => (
+      <code className={clsx(className, "bg-gray-800 px-1 py-0.5 rounded")} {...props}>
+        {children}
+      </code>
+    )
+  };
+
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div className={`max-w-[80%] rounded-lg px-4 py-4 ${
-        isUser ? 'bg-purple-600' : 'bg-gray-800/50'
-      }`}>
-        {(isUser ? [{type: 'text', content: message.content, index: 0}] : parseThinkBlocks(message.content)).map((part) => {
+    <div className={clsx('flex mb-4', isUser ? 'justify-end' : 'justify-start')}>
+      <div 
+        className={clsx(
+          'max-w-[80%] rounded-lg px-4 py-4',
+          isUser ? 'bg-purple-600' : 'bg-gray-800/50'
+        )}
+      >
+        {parseThinkBlocks.map((part) => {
           if (!isUser && part.type === 'think') {
             return (
               <details
@@ -91,13 +145,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 >
                   <span className="flex-1">Model is thinking...</span>
                   <svg
-                    className={`transform transition-transform ${
+                    className={clsx(
+                      'transform transition-transform',
                       expandedThinkBlocks.has(part.index) ? 'rotate-180' : ''
-                    }`}
+                    )}
                     width="16"
                     height="16"
                     viewBox="0 0 16 16"
                     fill="none"
+                    aria-hidden="true"
                   >
                     <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5"/>
                   </svg>
@@ -105,13 +161,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 <div className="mt-2 text-gray-300 text-sm">
                   <ReactMarkdown
                     rehypePlugins={undefined}
-                    components={{
-                      code: ({ node, className, children, ...props }) => (
-                        <code className={clsx(className, "bg-gray-800 px-1 py-0.5 rounded")} {...props}>
-                          {children}
-                        </code>
-                      )
-                    }}
+                    components={thinkBlockComponents}
                   >
                     {part.content}
                   </ReactMarkdown>
@@ -119,46 +169,24 @@ export function ChatMessage({ message }: ChatMessageProps) {
               </details>
             );
           }
-          return isUser ? (
-            <div 
-              key={part.index}
-              className="text-sm whitespace-pre-wrap break-words leading-[1.5rem]"
-            >
-              {part.content}
-            </div>
-          ) : (
+          
+          if (isUser) {
+            return (
+              <div 
+                key={part.index}
+                className="text-sm whitespace-pre-wrap break-words leading-[1.5rem]"
+              >
+                {part.content}
+              </div>
+            );
+          }
+          
+          return (
             <ReactMarkdown
               key={part.index}
               className="text-sm overflow-x-auto break-words leading-[1.5rem]"
               rehypePlugins={[rehypeMath, rehypeKatex, rehypeHighlight]}
-              components={{
-                code({ node, className, children, ...props }) {
-                  return (
-                    <code className={clsx(className, "bg-gray-900 px-1 py-0.5 rounded max-w-full break-all")} {...props}>
-                      {children}
-                    </code>
-                  )
-                },
-                pre({ node, className, children, ...props }) {
-                  return (
-                    <pre className="bg-gray-900 p-4 rounded-lg overflow-x-auto my-1 max-w-[65vw] whitespace-pre">
-                      <code className="block bg-inherit p-0 text-sm">
-                        {children}
-                      </code>
-                    </pre>
-                  )
-                },
-                p: ({ node, ...props }) => <p className="mb-1" {...props} />,
-                ul: ({ node, ...props }) => (
-                  <ul className="list-disc pl-4" {...props} />
-                ),
-                ol: ({ node, ...props }) => (
-                  <ol className="list-decimal pl-4" {...props} />
-                ),
-                li: ({ node, ...props }) => (
-                  <li className="my-1" {...props} />
-                )
-              }}
+              components={markdownComponents}
             >
               {part.content}
             </ReactMarkdown>
@@ -167,4 +195,4 @@ export function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </div>
   );
-} 
+};
